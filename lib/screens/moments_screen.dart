@@ -89,8 +89,8 @@ class _MomentCard extends StatelessWidget {
                     ? CachedNetworkImage(
                         imageUrl: moment.imageUrl!,
                         fit: BoxFit.cover,
-                        placeholder: (_, __) => Container(color: kSidebar),
-                        errorWidget: (_, __, ___) =>
+                        placeholder: (_, _) => Container(color: kSidebar),
+                        errorWidget: (_, _, _) =>
                             Container(color: kSidebar),
                       )
                     : Container(

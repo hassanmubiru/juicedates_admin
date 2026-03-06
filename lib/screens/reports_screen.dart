@@ -29,7 +29,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
               const Text('Open only', style: TextStyle(color: kMuted, fontSize: 13)),
               Switch(
                 value: _unresolvedOnly,
-                activeColor: kTangerine,
+                activeThumbColor: kTangerine,
                 onChanged: (v) => setState(() => _unresolvedOnly = v),
               ),
             ],
@@ -66,7 +66,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
           return ListView.separated(
             padding: const EdgeInsets.all(24),
             itemCount: reports.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (_, i) => _ReportCard(
               report: reports[i],
               onResolve: () => _svc.resolveReport(reports[i].id),
@@ -99,7 +99,7 @@ class _ReportCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: kDanger.withOpacity(0.12),
+                color: kDanger.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(Icons.flag_rounded, color: kDanger, size: 22),
@@ -141,7 +141,7 @@ class _ReportCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
-                  color: kSuccess.withOpacity(0.12),
+                  color: kSuccess.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: const Text('Resolved',
@@ -168,7 +168,7 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: color.withOpacity(0.4))),
+            side: BorderSide(color: color.withValues(alpha: 0.4))),
       ),
       onPressed: onPressed,
       child: Text(label, style: const TextStyle(fontSize: 13)),

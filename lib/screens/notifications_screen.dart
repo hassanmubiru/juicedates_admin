@@ -205,7 +205,7 @@ class _HistoryList extends StatelessWidget {
               }
               return ListView.separated(
                 itemCount: items.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 8),
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (_, i) => _HistoryTile(data: items[i]),
               );
             },
@@ -238,7 +238,7 @@ class _HistoryTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: kTangerine.withOpacity(0.12),
+            color: kTangerine.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Icon(Icons.notifications_rounded,
@@ -263,9 +263,9 @@ class _HistoryTile extends StatelessWidget {
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: statusColor.withOpacity(0.12),
+            color: statusColor.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: statusColor.withOpacity(0.4)),
+            border: Border.all(color: statusColor.withValues(alpha: 0.4)),
           ),
           child: Text(status,
               style: TextStyle(

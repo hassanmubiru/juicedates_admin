@@ -165,7 +165,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               dotData: const FlDotData(show: false),
                               belowBarData: BarAreaData(
                                   show: true,
-                                  color: kTangerine.withOpacity(0.12)),
+                                  color: kTangerine.withValues(alpha: 0.12)),
                             ),
                           ],
                         ),

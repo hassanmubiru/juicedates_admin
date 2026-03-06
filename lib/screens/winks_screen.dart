@@ -45,7 +45,7 @@ class WinksScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(24),
             itemCount: winks.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 6),
+            separatorBuilder: (_, _) => const SizedBox(height: 6),
             itemBuilder: (_, i) => _WinkTile(data: winks[i]),
           );
         },
@@ -78,7 +78,7 @@ class _WinkTile extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: const Color(0xFF00BCD4).withOpacity(0.12),
+            color: const Color(0xFF00BCD4).withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(10),
           ),
           child: const Text('👋', style: TextStyle(fontSize: 22)),
@@ -110,13 +110,13 @@ class _WinkTile extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
             color: seen
-                ? kSuccess.withOpacity(0.12)
-                : kWarning.withOpacity(0.12),
+                ? kSuccess.withValues(alpha: 0.12)
+                : kWarning.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
                 color: seen
-                    ? kSuccess.withOpacity(0.4)
-                    : kWarning.withOpacity(0.4)),
+                    ? kSuccess.withValues(alpha: 0.4)
+                    : kWarning.withValues(alpha: 0.4)),
           ),
           child: Text(
             seen ? 'Seen' : 'Unseen',

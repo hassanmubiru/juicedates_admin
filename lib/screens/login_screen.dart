@@ -130,9 +130,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                       decoration: BoxDecoration(
-                        color: kDanger.withOpacity(0.15),
+                        color: kDanger.withValues(alpha: 0.15),
                         borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: kDanger.withOpacity(0.4)),
+                        border: Border.all(color: kDanger.withValues(alpha: 0.4)),
                       ),
                       child: Row(
                         children: [

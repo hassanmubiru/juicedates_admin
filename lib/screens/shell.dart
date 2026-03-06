@@ -122,8 +122,8 @@ class _FullSidebar extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8)),
                     tileColor:
-                        active ? kTangerine.withOpacity(0.15) : Colors.transparent,
-                    selectedTileColor: kTangerine.withOpacity(0.15),
+                        active ? kTangerine.withValues(alpha: 0.15) : Colors.transparent,
+                    selectedTileColor: kTangerine.withValues(alpha: 0.15),
                     leading: Icon(item.icon,
                         color: active ? kTangerine : kMuted, size: 20),
                     title: Text(item.label,
@@ -175,7 +175,7 @@ class _RailSidebar extends StatelessWidget {
       onDestinationSelected: onTap,
       minWidth: _kRailWidth,
       useIndicator: true,
-      indicatorColor: kTangerine.withOpacity(0.2),
+      indicatorColor: kTangerine.withValues(alpha: 0.2),
       selectedIconTheme: const IconThemeData(color: kTangerine),
       unselectedIconTheme: const IconThemeData(color: kMuted),
       destinations: [
