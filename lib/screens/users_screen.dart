@@ -98,6 +98,26 @@ class _UsersScreenState extends State<UsersScreen> {
                   return const Center(
                       child: CircularProgressIndicator(color: kTangerine));
                 }
+                if (snap.hasError) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.wifi_off_rounded,
+                            size: 60, color: kMuted),
+                        const SizedBox(height: 16),
+                        const Text('Failed to load users',
+                            style: TextStyle(
+                                color: Colors.white, fontSize: 16)),
+                        const SizedBox(height: 8),
+                        Text('${snap.error}',
+                            style: const TextStyle(
+                                color: kMuted, fontSize: 12),
+                            textAlign: TextAlign.center),
+                      ],
+                    ),
+                  );
+                }
                 final users = _filter(snap.data ?? []);
                 if (users.isEmpty) {
                   return const Center(
