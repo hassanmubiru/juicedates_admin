@@ -7,20 +7,16 @@ class AdminService {
 
   // ── Users ─────────────────────────────────────────────────────────────
 
-  Stream<List<AdminUser>> getAllUsers() {
-    return _db
-        .collection('users')
-        .snapshots()
-        .map((s) {
-          final users = s.docs.map(AdminUser.fromDoc).toList();
-          users.sort((a, b) {
-            if (a.createdAt == null && b.createdAt == null) return 0;
-            if (a.createdAt == null) return 1;
-            if (b.createdAt == null) return -1;
-            return b.createdAt!.compareTo(a.createdAt!);
-          });
-          return users;
-        });
+  Future<List<AdminUser>> getUsersOnce() async {
+    final snap = await _db.collection('users').get();
+    final users = snap.docs.map(AdminUser.fromDoc).toList();
+    users.sort((a, b) {
+      if (a.createdAt == null && b.createdAt == null) return 0;
+      if (a.createdAt == null) return 1;
+      if (b.createdAt == null) return -1;
+      return b.createdAt!.compareTo(a.createdAt!);
+    });
+    return users;
   }
 
   Future<Map<String, dynamic>> getAdminStats() async {

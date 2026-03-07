@@ -18,6 +18,15 @@ class _UsersScreenState extends State<UsersScreen> {
   String _query      = '';
   bool _bannedOnly   = false;
   bool _premiumOnly  = false;
+  late Future<List<AdminUser>> _usersFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _usersFuture = _svc.getUsersOnce();
+  }
+
+  void _refresh() => setState(() => _usersFuture = _svc.getUsersOnce());
 
   @override
   void dispose() {
@@ -47,6 +56,11 @@ class _UsersScreenState extends State<UsersScreen> {
         title: const Text('Users',
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh_rounded, color: Colors.white),
+            tooltip: 'Refresh',
+            onPressed: _refresh,
+          ),
           // Filter chips
           _FilterChip(
             label: 'Banned',
@@ -91,8 +105,8 @@ class _UsersScreenState extends State<UsersScreen> {
 
           // Table
           Expanded(
-            child: StreamBuilder<List<AdminUser>>(
-              stream: _svc.getAllUsers(),
+            child: FutureBuilder<List<AdminUser>>(
+              future: _usersFuture,
               builder: (ctx, snap) {
                 if (snap.connectionState == ConnectionState.waiting) {
                   return const Center(
@@ -114,14 +128,41 @@ class _UsersScreenState extends State<UsersScreen> {
                             style: const TextStyle(
                                 color: kMuted, fontSize: 12),
                             textAlign: TextAlign.center),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _refresh,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Retry'),
+                        ),
                       ],
                     ),
                   );
                 }
-                final users = _filter(snap.data ?? []);
+                final allUsers = snap.data ?? [];
+                final users = _filter(allUsers);
+                if (allUsers.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.people_outline_rounded,
+                            size: 60, color: kMuted),
+                        const SizedBox(height: 16),
+                        const Text('No users in database.',
+                            style: TextStyle(color: kMuted)),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: _refresh,
+                          icon: const Icon(Icons.refresh_rounded),
+                          label: const Text('Refresh'),
+                        ),
+                      ],
+                    ),
+                  );
+                }
                 if (users.isEmpty) {
                   return const Center(
-                      child: Text('No users found.',
+                      child: Text('No users match the current filter.',
                           style: TextStyle(color: kMuted)));
                 }
                 return Padding(
