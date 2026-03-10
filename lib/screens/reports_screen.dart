@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import '../models/models.dart';
 import '../services/admin_service.dart';
@@ -71,6 +72,28 @@ class _ReportsScreenState extends State<ReportsScreen> {
               report: reports[i],
               onResolve: () => _svc.resolveReport(reports[i].id),
               onDismiss: () => _svc.dismissReport(reports[i].id),
+              onBanReporter: () async {
+                await _svc.banUser(reports[i].reporterUid);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Reporter banned'),
+                      backgroundColor: kDanger,
+                    ),
+                  );
+                }
+              },
+              onBanReported: () async {
+                await _svc.banUser(reports[i].reportedUid);
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Reported user banned'),
+                      backgroundColor: kDanger,
+                    ),
+                  );
+                }
+              },
             ),
           );
         },
@@ -83,8 +106,11 @@ class _ReportCard extends StatelessWidget {
   final AdminReport report;
   final VoidCallback onResolve;
   final VoidCallback onDismiss;
+  final VoidCallback onBanReporter;
+  final VoidCallback onBanReported;
   const _ReportCard(
-      {required this.report, required this.onResolve, required this.onDismiss});
+      {required this.report, required this.onResolve, required this.onDismiss,
+       required this.onBanReporter, required this.onBanReported});
 
   @override
   Widget build(BuildContext context) {
@@ -115,10 +141,8 @@ class _ReportCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           fontSize: 15)),
                   const SizedBox(height: 4),
-                  Text(
-                    'Reporter: ${report.reporterUid.substring(0, 8)}… → Reported: ${report.reportedUid.substring(0, 8)}…',
-                    style: const TextStyle(color: kMuted, fontSize: 12),
-                  ),
+                  _UidRow('Reporter', report.reporterUid),
+                  _UidRow('Reported', report.reportedUid),
                   const SizedBox(height: 2),
                   Text(ts, style: const TextStyle(color: kMuted, fontSize: 11)),
                 ],
@@ -136,8 +160,25 @@ class _ReportCard extends StatelessWidget {
                 label: 'Dismiss',
                 color: kMuted,
                 onPressed: onDismiss,
-              ),
-            ] else
+              ),              const SizedBox(width: 8),
+              PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert, color: kMuted, size: 20),
+                color: kCard,
+                onSelected: (v) {
+                  if (v == 'ban_reporter') onBanReporter();
+                  if (v == 'ban_reported') onBanReported();
+                },
+                itemBuilder: (_) => [
+                  const PopupMenuItem(
+                      value: 'ban_reporter',
+                      child: Text('Ban Reporter',
+                          style: TextStyle(color: kDanger))),
+                  const PopupMenuItem(
+                      value: 'ban_reported',
+                      child: Text('Ban Reported User',
+                          style: TextStyle(color: kDanger))),
+                ],
+              ),            ] else
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
