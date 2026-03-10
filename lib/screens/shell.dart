@@ -43,10 +43,15 @@ class _AdminShellState extends State<AdminShell> {
   final _screens = const [
     DashboardScreen(),
     UsersScreen(),
+    MatchesScreen(),
+    AnalyticsScreen(),
+    SubscriptionsScreen(),
     ReportsScreen(),
     MomentsScreen(),
     WinksScreen(),
+    ContentModerationScreen(),
     NotificationsScreen(),
+    AppConfigScreen(),
   ];
 
   @override

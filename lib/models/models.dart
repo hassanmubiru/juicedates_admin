@@ -17,6 +17,9 @@ class AdminUser {
   final DateTime? lastActive;
   final int reportCount;
   final String? warningNote;
+  final String subscriptionTier;
+  final DateTime? subscriptionExpiry;
+  final String? bio;
 
   const AdminUser({
     required this.uid,
@@ -34,6 +37,9 @@ class AdminUser {
     this.lastActive,
     this.reportCount = 0,
     this.warningNote,
+    this.subscriptionTier = '',
+    this.subscriptionExpiry,
+    this.bio,
   });
 
   factory AdminUser.fromDoc(DocumentSnapshot doc) {
@@ -45,6 +51,10 @@ class AdminUser {
     DateTime? lastActive;
     if (d['lastActive'] is Timestamp) {
       lastActive = (d['lastActive'] as Timestamp).toDate();
+    }
+    DateTime? subscriptionExpiry;
+    if (d['subscriptionExpiry'] is Timestamp) {
+      subscriptionExpiry = (d['subscriptionExpiry'] as Timestamp).toDate();
     }
     return AdminUser(
       uid: doc.id,
@@ -62,6 +72,9 @@ class AdminUser {
       lastActive: lastActive,
       reportCount: d['reportCount'] as int? ?? 0,
       warningNote: d['warningNote'] as String?,
+      subscriptionTier: d['subscriptionTier'] as String? ?? '',
+      subscriptionExpiry: subscriptionExpiry,
+      bio: d['bio'] as String?,
     );
   }
 }
