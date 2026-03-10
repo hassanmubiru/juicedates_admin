@@ -101,14 +101,26 @@ class _ComposeCard extends StatelessWidget {
   final TextEditingController titleCtrl;
   final TextEditingController bodyCtrl;
   final bool sending;
+  final String segment;
+  final ValueChanged<String> onSegmentChanged;
   final VoidCallback onSend;
   const _ComposeCard({
     required this.formKey,
     required this.titleCtrl,
     required this.bodyCtrl,
     required this.sending,
+    required this.segment,
+    required this.onSegmentChanged,
     required this.onSend,
   });
+
+  String get _segmentLabel {
+    switch (segment) {
+      case 'premium': return 'Premium users only';
+      case 'city':    return 'Users in a specific city';
+      default:        return 'All users';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,9 +146,31 @@ class _ComposeCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 4),
-              const Text('Delivered to all users via push notification',
-                  style: TextStyle(color: kMuted, fontSize: 12)),
-              const SizedBox(height: 20),
+              Text('Target: $_segmentLabel',
+                  style: const TextStyle(color: kMuted, fontSize: 12)),
+              const SizedBox(height: 12),
+              // Segment chips
+              Wrap(
+                spacing: 8,
+                children: [
+                  _SegChip(
+                    label: 'All',
+                    active: segment == 'all',
+                    onTap: () => onSegmentChanged('all'),
+                  ),
+                  _SegChip(
+                    label: 'Premium ⭐',
+                    active: segment == 'premium',
+                    onTap: () => onSegmentChanged('premium'),
+                  ),
+                  _SegChip(
+                    label: 'By City',
+                    active: segment == 'city',
+                    onTap: () => onSegmentChanged('city'),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
               TextFormField(
                 controller: titleCtrl,
                 style: const TextStyle(color: Colors.white),
@@ -172,6 +206,37 @@ class _ComposeCard extends StatelessWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SegChip extends StatelessWidget {
+  final String label;
+  final bool active;
+  final VoidCallback onTap;
+  const _SegChip(
+      {required this.label, required this.active, required this.onTap});
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: active
+              ? kTangerine.withValues(alpha: 0.15)
+              : kSidebar,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: active ? kTangerine : kBorder),
+        ),
+        child: Text(label,
+            style: TextStyle(
+                color: active ? kTangerine : kMuted,
+                fontSize: 12,
+                fontWeight:
+                    active ? FontWeight.w600 : FontWeight.normal)),
       ),
     );
   }
