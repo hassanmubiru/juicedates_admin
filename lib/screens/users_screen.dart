@@ -427,3 +427,202 @@ class _FilterChip extends StatelessWidget {
     );
   }
 }
+
+class _ProfileDialog extends StatefulWidget {
+  final AdminUser user;
+  final AdminService svc;
+  final VoidCallback onChanged;
+  const _ProfileDialog(
+      {required this.user, required this.svc, required this.onChanged});
+  @override
+  State<_ProfileDialog> createState() => _ProfileDialogState();
+}
+
+class _ProfileDialogState extends State<_ProfileDialog> {
+  late TextEditingController _noteCtrl;
+
+  @override
+  void initState() {
+    super.initState();
+    _noteCtrl =
+        TextEditingController(text: widget.user.warningNote ?? '');
+  }
+
+  @override
+  void dispose() {
+    _noteCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _saveNote() async {
+    await widget.svc.saveAdminNote(widget.user.uid, _noteCtrl.text.trim());
+    if (mounted) {
+      Navigator.pop(context);
+      widget.onChanged();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Note saved ✓'), backgroundColor: kSuccess),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final u = widget.user;
+    final joined = u.createdAt != null
+        ? DateFormat('MMM d, y').format(u.createdAt!)
+        : '—';
+    final lastActive = u.lastActive != null
+        ? DateFormat('MMM d, y — HH:mm').format(u.lastActive!)
+        : '—';
+    return AlertDialog(
+      backgroundColor: kCard,
+      titlePadding: EdgeInsets.zero,
+      content: SizedBox(
+        width: 400,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Header
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: kSidebar,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: kTangerine,
+                    backgroundImage:
+                        (u.photoUrl != null && u.photoUrl!.isNotEmpty)
+                            ? CachedNetworkImageProvider(u.photoUrl!)
+                                as ImageProvider
+                            : null,
+                    child: (u.photoUrl == null || u.photoUrl!.isEmpty)
+                        ? const Icon(Icons.person,
+                            color: Colors.white, size: 28)
+                        : null,
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(u.displayName,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16)),
+                        if (u.email != null)
+                          Text(u.email!,
+                              style: const TextStyle(
+                                  color: kMuted, fontSize: 12)),
+                        const SizedBox(height: 4),
+                        Wrap(
+                          spacing: 4,
+                          children: [
+                            if (u.age > 0)
+                              _InfoChip('${u.age}y', kMuted),
+                            if (u.gender.isNotEmpty)
+                              _InfoChip(u.gender, kMuted),
+                            if (u.city.isNotEmpty)
+                              _InfoChip(u.city, kMuted),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _DetailRow('Joined', joined),
+                  _DetailRow('Last Active', lastActive),
+                  _DetailRow('Premium',
+                      u.isPremium ? u.subscriptionTier.toUpperCase() : 'No'),
+                  _DetailRow('Verified', u.isVerified ? 'Yes' : 'No'),
+                  _DetailRow('Reports', '${u.reportCount}'),
+                  if (u.bio != null && u.bio!.isNotEmpty)
+                    _DetailRow('Bio', u.bio!),
+                  const SizedBox(height: 16),
+                  const Text('Admin Note',
+                      style: TextStyle(
+                          color: kMuted,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600)),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: _noteCtrl,
+                    style: const TextStyle(color: Colors.white, fontSize: 13),
+                    maxLines: 3,
+                    decoration: const InputDecoration(
+                        hintText: 'Add a private note about this user…'),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close')),
+        ElevatedButton.icon(
+          icon: const Icon(Icons.save_rounded, size: 16),
+          label: const Text('Save Note'),
+          onPressed: _saveNote,
+        ),
+      ],
+    );
+  }
+}
+
+class _InfoChip extends StatelessWidget {
+  final String text;
+  final Color color;
+  const _InfoChip(this.text, this.color);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Text(text,
+          style: TextStyle(color: color, fontSize: 11)),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _DetailRow(this.label, this.value);
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 90,
+            child: Text(label,
+                style: const TextStyle(color: kMuted, fontSize: 12)),
+          ),
+          Expanded(
+            child: Text(value,
+                style: const TextStyle(color: Colors.white, fontSize: 13)),
+          ),
+        ],
+      ),
+    );
+  }
+}
