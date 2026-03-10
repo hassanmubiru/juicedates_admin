@@ -15,6 +15,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   final _bodyCtrl  = TextEditingController();
   final _formKey   = GlobalKey<FormState>();
   bool _sending    = false;
+  String _segment  = 'all'; // 'all' | 'premium' | 'city'
 
   @override
   void dispose() {
@@ -27,7 +28,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     if (!_formKey.currentState!.validate()) return;
     setState(() => _sending = true);
     await _svc.sendBroadcast(
-        _titleCtrl.text.trim(), _bodyCtrl.text.trim());
+        _titleCtrl.text.trim(), _bodyCtrl.text.trim(),
+        segment: _segment);
     if (mounted) {
       _titleCtrl.clear();
       _bodyCtrl.clear();
@@ -66,8 +68,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           formKey: _formKey,
                           titleCtrl: _titleCtrl,
                           bodyCtrl: _bodyCtrl,
-                          sending: _sending,
-                          onSend: _send,
+                          sending: _sending,                          segment: _segment,
+                          onSegmentChanged: (s) => setState(() => _segment = s),                          onSend: _send,
                         )),
                     const SizedBox(width: 24),
                     Expanded(child: _HistoryList(svc: _svc)),
@@ -80,6 +82,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       titleCtrl: _titleCtrl,
                       bodyCtrl: _bodyCtrl,
                       sending: _sending,
+                      segment: _segment,
+                      onSegmentChanged: (s) => setState(() => _segment = s),
                       onSend: _send,
                     ),
                     const SizedBox(height: 24),
