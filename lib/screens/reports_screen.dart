@@ -160,7 +160,8 @@ class _ReportCard extends StatelessWidget {
                 label: 'Dismiss',
                 color: kMuted,
                 onPressed: onDismiss,
-              ),              const SizedBox(width: 8),
+              ),
+              const SizedBox(width: 8),
               PopupMenuButton<String>(
                 icon: const Icon(Icons.more_vert, color: kMuted, size: 20),
                 color: kCard,
@@ -178,7 +179,8 @@ class _ReportCard extends StatelessWidget {
                       child: Text('Ban Reported User',
                           style: TextStyle(color: kDanger))),
                 ],
-              ),            ] else
+              ),
+            ] else
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
@@ -213,6 +215,38 @@ class _ActionButton extends StatelessWidget {
       ),
       onPressed: onPressed,
       child: Text(label, style: const TextStyle(fontSize: 13)),
+    );
+  }
+}
+
+class _UidRow extends StatelessWidget {
+  final String label;
+  final String uid;
+  const _UidRow(this.label, this.uid);
+  @override
+  Widget build(BuildContext context) {
+    final short = uid.length > 8 ? '${uid.substring(0, 8)}…' : uid;
+    return GestureDetector(
+      onTap: () {
+        Clipboard.setData(ClipboardData(text: uid));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$label UID copied'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      },
+      child: Row(children: [
+        Text('$label: ',
+            style: const TextStyle(color: kMuted, fontSize: 12)),
+        Text(short,
+            style: const TextStyle(
+                color: kMuted,
+                fontSize: 12,
+                decoration: TextDecoration.underline)),
+        const SizedBox(width: 4),
+        const Icon(Icons.copy_rounded, color: kMuted, size: 11),
+      ]),
     );
   }
 }
