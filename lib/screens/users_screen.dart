@@ -347,6 +347,13 @@ class _UsersScreenState extends State<UsersScreen> {
     );
     if (ok == true) action();
   }
+
+  void _showProfile(BuildContext context, AdminUser u) {
+    showDialog(
+      context: context,
+      builder: (_) => _ProfileDialog(user: u, svc: _svc, onChanged: _refresh),
+    );
+  }
 }
 
 class _Badge extends StatelessWidget {
