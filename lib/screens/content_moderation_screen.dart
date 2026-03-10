@@ -285,15 +285,26 @@ class _RejectReasonDialogState extends State<_RejectReasonDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            ..._reasons.map((r) => RadioListTile<String>(
-                  value: r,
-                  groupValue: _selected,
-                  activeColor: kTangerine,
-                  title: Text(r,
-                      style: const TextStyle(
-                          color: Colors.white, fontSize: 13)),
-                  onChanged: (v) => setState(() => _selected = v),
-                )),
+            RadioGroup<String>(
+              groupValue: _selected,
+              onChanged: (v) => setState(() => _selected = v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: _reasons
+                    .map((r) => RadioListTile<String>(
+                          value: r,
+                          fillColor: WidgetStateProperty.resolveWith(
+                            (s) => s.contains(WidgetState.selected)
+                                ? kTangerine
+                                : null,
+                          ),
+                          title: Text(r,
+                              style: const TextStyle(
+                                  color: Colors.white, fontSize: 13)),
+                        ))
+                    .toList(),
+              ),
+            ),
             const SizedBox(height: 8),
             TextField(
               controller: _custom,

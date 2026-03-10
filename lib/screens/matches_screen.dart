@@ -54,6 +54,7 @@ class _MatchesScreenState extends State<MatchesScreen> {
     );
     if (ok == true && mounted) {
       await _svc.deleteMatch(match.id);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Match deleted'),

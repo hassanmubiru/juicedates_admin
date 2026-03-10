@@ -103,13 +103,13 @@ class _ConfigFormState extends State<_ConfigForm> {
     _boostDurationCtrl =
         TextEditingController(text: '${c.boostDurationMinutes}');
     _boostPriceCtrl =
-        TextEditingController(text: '${c.boostPriceUsd.toStringAsFixed(2)}');
+        TextEditingController(text: c.boostPriceUsd.toStringAsFixed(2));
     _premiumPriceCtrl = TextEditingController(
-        text: '${c.premiumMonthlyUsd.toStringAsFixed(2)}');
+        text: c.premiumMonthlyUsd.toStringAsFixed(2));
     _minAgeCtrl = TextEditingController(text: '${c.minAge}');
     _maxAgeCtrl = TextEditingController(text: '${c.maxAge}');
     _maxDistCtrl =
-        TextEditingController(text: '${c.maxDistanceKm.toStringAsFixed(0)}');
+        TextEditingController(text: c.maxDistanceKm.toStringAsFixed(0));
   }
 
   @override
@@ -346,7 +346,7 @@ class _SwitchTile extends StatelessWidget {
     return SwitchListTile(
       value: value,
       onChanged: onChanged,
-      activeColor: activeColor,
+      activeThumbColor: activeColor,
       secondary: Icon(icon, color: value ? activeColor : kMuted, size: 20),
       title:
           Text(title, style: const TextStyle(color: Colors.white, fontSize: 14)),

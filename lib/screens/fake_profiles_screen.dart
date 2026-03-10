@@ -283,7 +283,7 @@ class _UserList extends StatelessWidget {
     return ListView.separated(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       itemCount: users.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 6),
+      separatorBuilder: (_, _) => const SizedBox(height: 6),
       itemBuilder: (_, i) => _SuspectCard(
         user: users[i],
         isFlagged: isFlagged,
