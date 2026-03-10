@@ -20,6 +20,8 @@ class AdminUser {
   final String subscriptionTier;
   final DateTime? subscriptionExpiry;
   final String? bio;
+  final bool isSuspicious;
+  final String? suspicionReason;
 
   const AdminUser({
     required this.uid,
@@ -40,6 +42,8 @@ class AdminUser {
     this.subscriptionTier = '',
     this.subscriptionExpiry,
     this.bio,
+    this.isSuspicious = false,
+    this.suspicionReason,
   });
 
   factory AdminUser.fromDoc(DocumentSnapshot doc) {
@@ -75,6 +79,8 @@ class AdminUser {
       subscriptionTier: d['subscriptionTier'] as String? ?? '',
       subscriptionExpiry: subscriptionExpiry,
       bio: d['bio'] as String?,
+      isSuspicious: d['isSuspicious'] as bool? ?? false,
+      suspicionReason: d['suspicionReason'] as String?,
     );
   }
 }

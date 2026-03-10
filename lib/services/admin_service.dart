@@ -115,6 +115,7 @@ class AdminService {
     await _db.collection('users').doc(uid).update({
       'isPremium': true,
       'subscriptionTier': tier,
+      'subscribedAt': FieldValue.serverTimestamp(),
       'subscriptionExpiry': Timestamp.fromDate(
           DateTime.now().add(const Duration(days: 30))),
     });
@@ -138,6 +139,44 @@ class AdminService {
 
   Future<void> unverifyUser(String uid) async {
     await _db.collection('users').doc(uid).update({'isVerified': false});
+  }
+
+  Future<void> flagAsSuspicious(String uid, String reason) async {
+    await _db.collection('users').doc(uid).update({
+      'isSuspicious': true,
+      'suspicionReason': reason,
+      'suspicionFlaggedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  Future<void> unflagSuspicious(String uid) async {
+    await _db.collection('users').doc(uid).update({
+      'isSuspicious': false,
+      'suspicionReason': FieldValue.delete(),
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> getSubscriptionsByDay(int days) async {
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final snap = await _db
+        .collection('users')
+        .where('isPremium', isEqualTo: true)
+        .where('subscribedAt', isGreaterThan: Timestamp.fromDate(cutoff))
+        .orderBy('subscribedAt')
+        .get();
+    final Map<String, int> counts = {};
+    for (final doc in snap.docs) {
+      final ts = doc.data()['subscribedAt'];
+      if (ts == null) continue;
+      final dt = (ts as Timestamp).toDate();
+      final key =
+          '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
+      counts[key] = (counts[key] ?? 0) + 1;
+    }
+    return counts.entries
+        .map((e) => {'date': e.key, 'count': e.value})
+        .toList()
+      ..sort((a, b) => (a['date'] as String).compareTo(b['date'] as String));
   }
 
   // ── Matches ────────────────────────────────────────────────────────────

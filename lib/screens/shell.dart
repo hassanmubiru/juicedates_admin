@@ -12,6 +12,8 @@ import 'analytics_screen.dart';
 import 'subscriptions_screen.dart';
 import 'content_moderation_screen.dart';
 import 'app_config_screen.dart';
+import 'fake_profiles_screen.dart';
+import 'revenue_screen.dart';
 
 const _navItems = [
   (icon: Icons.dashboard_rounded,         label: 'Dashboard'),
@@ -25,6 +27,8 @@ const _navItems = [
   (icon: Icons.shield_rounded,            label: 'Moderation'),
   (icon: Icons.notifications_rounded,     label: 'Notifications'),
   (icon: Icons.settings_rounded,          label: 'App Config'),
+  (icon: Icons.gpp_bad_rounded,           label: 'Fake Profiles'),
+  (icon: Icons.attach_money_rounded,      label: 'Revenue'),
 ];
 
 const _kSidebarWidth = 220.0;
@@ -52,6 +56,8 @@ class _AdminShellState extends State<AdminShell> {
     ContentModerationScreen(),
     NotificationsScreen(),
     AppConfigScreen(),
+    FakeProfilesScreen(),
+    RevenueScreen(),
   ];
 
   @override
