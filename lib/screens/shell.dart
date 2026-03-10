@@ -7,14 +7,24 @@ import 'reports_screen.dart';
 import 'moments_screen.dart';
 import 'notifications_screen.dart';
 import 'winks_screen.dart';
+import 'matches_screen.dart';
+import 'analytics_screen.dart';
+import 'subscriptions_screen.dart';
+import 'content_moderation_screen.dart';
+import 'app_config_screen.dart';
 
 const _navItems = [
-  (icon: Icons.dashboard_rounded,       label: 'Dashboard'),
-  (icon: Icons.people_rounded,          label: 'Users'),
-  (icon: Icons.flag_rounded,            label: 'Reports'),
-  (icon: Icons.auto_stories_rounded,    label: 'Moments'),
-  (icon: Icons.waving_hand_rounded,     label: 'Winks'),
-  (icon: Icons.notifications_rounded,   label: 'Notifications'),
+  (icon: Icons.dashboard_rounded,         label: 'Dashboard'),
+  (icon: Icons.people_rounded,            label: 'Users'),
+  (icon: Icons.favorite_rounded,          label: 'Matches'),
+  (icon: Icons.bar_chart_rounded,         label: 'Analytics'),
+  (icon: Icons.star_rounded,              label: 'Subscriptions'),
+  (icon: Icons.flag_rounded,              label: 'Reports'),
+  (icon: Icons.auto_stories_rounded,      label: 'Moments'),
+  (icon: Icons.waving_hand_rounded,       label: 'Winks'),
+  (icon: Icons.shield_rounded,            label: 'Moderation'),
+  (icon: Icons.notifications_rounded,     label: 'Notifications'),
+  (icon: Icons.settings_rounded,          label: 'App Config'),
 ];
 
 const _kSidebarWidth = 220.0;
