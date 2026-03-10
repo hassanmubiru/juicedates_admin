@@ -175,7 +175,7 @@ class _UsersScreenState extends State<UsersScreen> {
                     dataRowHeight: 58,
                     columns: const [
                       DataColumn2(label: Text('User'), size: ColumnSize.L),
-                      DataColumn2(label: Text('City'),  size: ColumnSize.S),
+                      DataColumn2(label: Text('City / Age'), size: ColumnSize.S),
                       DataColumn2(label: Text('Joined'), size: ColumnSize.S),
                       DataColumn2(label: Text('Status'), size: ColumnSize.S),
                       DataColumn2(label: Text('Actions'), size: ColumnSize.M),
@@ -228,16 +228,29 @@ class _UsersScreenState extends State<UsersScreen> {
             ),
           ],
         )),
-        DataCell(Text(u.city, style: const TextStyle(color: kMuted))),
+        DataCell(GestureDetector(
+          onTap: () => _showProfile(context, u),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(u.city, style: const TextStyle(color: kMuted, fontSize: 12), overflow: TextOverflow.ellipsis),
+              if (u.age > 0) Text('${u.age}y', style: const TextStyle(color: kMuted, fontSize: 11)),
+            ],
+          ),
+        )),
         DataCell(Text(joined, style: const TextStyle(color: kMuted, fontSize: 12))),
         // Status badges
         DataCell(Wrap(
           spacing: 4,
           runSpacing: 4,
           children: [
-            if (u.isPremium) _Badge('⭐', kWarning),
-            if (u.isAdmin)   _Badge('🛡️ Admin', kTangerine),
-            if (u.isBanned)  _Badge('🚫 Banned', kDanger),
+            if (u.isPremium)  _Badge('⭐', kWarning),
+            if (u.isVerified) _Badge('✅', kSuccess),
+            if (u.isAdmin)    _Badge('🛡️', kTangerine),
+            if (u.isBanned)   _Badge('🚫', kDanger),
+            if (u.warningNote != null && u.warningNote!.isNotEmpty)
+              _Badge('⚠️', kWarning),
           ],
         )),
         // Actions
@@ -270,6 +283,17 @@ class _UsersScreenState extends State<UsersScreen> {
                   ? _svc.revokePremium(u.uid)
                   : _svc.grantPremium(u.uid),
             ),
+            // Verify toggle
+            _ActionBtn(
+              icon: u.isVerified
+                  ? Icons.verified_rounded
+                  : Icons.verified_outlined,
+              color: kSuccess,
+              tooltip: u.isVerified ? 'Remove Verification' : 'Verify',
+              onPressed: () => u.isVerified
+                  ? _svc.unverifyUser(u.uid)
+                  : _svc.verifyUser(u.uid),
+            ),
             // Admin toggle
             _ActionBtn(
               icon: u.isAdmin
@@ -284,6 +308,13 @@ class _UsersScreenState extends State<UsersScreen> {
                   : _confirm(context, 'Promote ${u.displayName}?',
                       'They will have full admin access.',
                       () => _svc.promoteToAdmin(u.uid)),
+            ),
+            // Admin note / profile
+            _ActionBtn(
+              icon: Icons.info_outline_rounded,
+              color: kMuted,
+              tooltip: 'View Profile / Add Note',
+              onPressed: () => _showProfile(context, u),
             ),
           ],
         )),

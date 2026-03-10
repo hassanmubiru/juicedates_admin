@@ -81,6 +81,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           '${s['moments']}', const Color(0xFF7B68EE), box.maxWidth, cols),
                       _StatCard('👋 Winks',
                           '${s['winks']}', const Color(0xFF00BCD4), box.maxWidth, cols),
+                      _StatCard('🚫 Banned',
+                          '${s['bannedUsers'] ?? 0}', kDanger, box.maxWidth, cols),
+                      _StatCard('✅ Verified',
+                          '${s['verifiedUsers'] ?? 0}', kSuccess, box.maxWidth, cols),
+                      _StatCard('📷 Pending Photos',
+                          '${s['pendingPhotos'] ?? 0}', kWarning, box.maxWidth, cols),
                     ],
                   );
                 });
