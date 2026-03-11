@@ -145,7 +145,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 reservedSize: 22,
-                                interval: (data.length / 4).ceilToDouble(),
+                                interval: (data.length / 4).ceilToDouble().clamp(1.0, double.infinity),
                                 getTitlesWidget: (v, _) {
                                   final i = v.toInt();
                                   if (i < 0 || i >= data.length) {
@@ -164,6 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                 sideTitles: SideTitles(showTitles: false)),
                           ),
                           borderData: FlBorderData(show: false),
+                          minY: 0,
                           lineBarsData: [
                             LineChartBarData(
                               spots: [
@@ -171,7 +172,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   FlSpot(i.toDouble(),
                                       (data[i]['count'] as int).toDouble()),
                               ],
-                              isCurved: true,
+                              isCurved: data.length > 2,
                               color: kTangerine,
                               barWidth: 2.5,
                               dotData: const FlDotData(show: false),

@@ -389,10 +389,11 @@ class _SubsChart extends StatelessWidget {
               sideTitles: SideTitles(showTitles: false)),
         ),
         borderData: FlBorderData(show: false),
+        minY: 0,
         lineBarsData: [
           LineChartBarData(
             spots: spots,
-            isCurved: true,
+            isCurved: spots.length > 2,
             color: kTangerine,
             barWidth: 2,
             dotData: const FlDotData(show: false),
