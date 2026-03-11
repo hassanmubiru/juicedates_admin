@@ -59,29 +59,42 @@ class _AdminCheckState extends State<_AdminCheck> {
   }
 
   Future<void> _verify() async {
-    final uid = FirebaseAuth.instance.currentUser?.uid;
-    if (uid == null) {
-      await FirebaseAuth.instance.signOut();
-      return;
-    }
-    final doc = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(uid)
-        .get();
-    final isAdmin = (doc.data()?['isAdmin'] as bool?) ?? false;
-    if (!isAdmin) {
+    try {
+      final uid = FirebaseAuth.instance.currentUser?.uid;
+      if (uid == null) {
+        await FirebaseAuth.instance.signOut();
+        return;
+      }
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .get();
+      final isAdmin = (doc.data()?['isAdmin'] as bool?) ?? false;
+      if (!isAdmin) {
+        await FirebaseAuth.instance.signOut();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Access denied — admin accounts only.'),
+              backgroundColor: kDanger,
+            ),
+          );
+        }
+        return;
+      }
+      if (mounted) setState(() => _verified = true);
+    } catch (e) {
+      // Network / Firestore error — sign out and show message
       await FirebaseAuth.instance.signOut();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Access denied — admin accounts only.'),
+          SnackBar(
+            content: Text('Sign-in error: $e'),
             backgroundColor: kDanger,
           ),
         );
       }
-      return;
     }
-    if (mounted) setState(() => _verified = true);
   }
 
   @override

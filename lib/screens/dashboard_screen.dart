@@ -54,6 +54,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FutureBuilder<Map<String, dynamic>>(
               future: _stats,
               builder: (context, snap) {
+                if (snap.hasError) {
+                  return _ErrorState(snap.error.toString());
+                }
                 if (!snap.hasData) {
                   return const Center(
                       child: CircularProgressIndicator(color: kTangerine));
@@ -102,6 +105,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FutureBuilder<List<Map<String, dynamic>>>(
               future: _chart,
               builder: (context, snap) {
+                if (snap.hasError) {
+                  return _ErrorState(snap.error.toString());
+                }
                 if (!snap.hasData) {
                   return const Center(
                       child: CircularProgressIndicator(color: kTangerine));
@@ -235,6 +241,30 @@ class _EmptyState extends StatelessWidget {
       height: 80,
       child: Center(
           child: Text(label, style: const TextStyle(color: kMuted))),
+    );
+  }
+}
+
+class _ErrorState extends StatelessWidget {
+  final String message;
+  const _ErrorState(this.message);
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 80,
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline_rounded, color: kDanger, size: 18),
+            const SizedBox(width: 8),
+            Flexible(
+              child: Text(message,
+                  style: const TextStyle(color: kDanger, fontSize: 13)),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -81,6 +81,15 @@ class _FakeProfilesScreenState extends State<FakeProfilesScreen>
         );
         _load();
       }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Detection failed: $e'),
+            backgroundColor: kDanger,
+          ),
+        );
+      }
     } finally {
       if (mounted) setState(() => _detecting = false);
     }
@@ -98,34 +107,42 @@ class _FakeProfilesScreenState extends State<FakeProfilesScreen>
   }
 
   Future<void> _onAction(_SuspectAction action, AdminUser user) async {
-    switch (action) {
-      case _SuspectAction.ban:
-        await _svc.banUser(user.uid);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('${user.displayName} banned')));
-        }
-      case _SuspectAction.dismiss:
-        await _svc.unflagSuspicious(user.uid);
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Dismissed — account is not suspicious')));
-        }
-      case _SuspectAction.flag:
-        final reason = await _showFlagDialog();
-        if (reason != null && reason.isNotEmpty && mounted) {
-          await _svc.flagAsSuspicious(user.uid, reason);
+    try {
+      switch (action) {
+        case _SuspectAction.ban:
+          await _svc.banUser(user.uid);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('${user.displayName} flagged')));
+                SnackBar(content: Text('${user.displayName} banned')));
           }
-        }
-      case _SuspectAction.copyUid:
-        await Clipboard.setData(ClipboardData(text: user.uid));
-        if (mounted) {
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text('UID copied')));
-        }
+        case _SuspectAction.dismiss:
+          await _svc.unflagSuspicious(user.uid);
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Dismissed — account is not suspicious')));
+          }
+        case _SuspectAction.flag:
+          final reason = await _showFlagDialog();
+          if (reason != null && reason.isNotEmpty && mounted) {
+            await _svc.flagAsSuspicious(user.uid, reason);
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('${user.displayName} flagged')));
+            }
+          }
+        case _SuspectAction.copyUid:
+          await Clipboard.setData(ClipboardData(text: user.uid));
+          if (mounted) {
+            ScaffoldMessenger.of(context)
+                .showSnackBar(const SnackBar(content: Text('UID copied')));
+          }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: kDanger),
+        );
+      }
     }
     _load();
   }
