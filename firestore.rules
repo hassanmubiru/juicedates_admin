@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper: true when the caller is a verified admin ──────────────────
+    function isAdmin() {
+      return request.auth != null
+          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    // ── Admin panel: full access to every collection ──────────────────────
+    match /{collection}/{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── users ─────────────────────────────────────────────────────────────
+    // Logged-in users can read/write their own document.
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
+
+    // ── matches ───────────────────────────────────────────────────────────
+    // Participants of a match can read it.
+    match /matches/{matchId} {
+      allow read: if request.auth != null
+          && (resource.data.uid1 == request.auth.uid
+           || resource.data.uid2 == request.auth.uid);
+    }
+
+    // ── moments ───────────────────────────────────────────────────────────
+    // Any authenticated user can read moments; owners can write their own.
+    match /moments/{momentId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+          && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if request.auth != null
+          && resource.data.uid == request.auth.uid;
+    }
+
+    // ── winks ─────────────────────────────────────────────────────────────
+    match /winks/{winkId} {
+      allow read: if request.auth != null
+          && (resource.data.fromUid == request.auth.uid
+           || resource.data.toUid   == request.auth.uid);
+      allow create: if request.auth != null
+          && request.resource.data.fromUid == request.auth.uid;
+    }
+
+    // ── reports ───────────────────────────────────────────────────────────
+    // Users can file reports; only admins can read or resolve them.
+    match /reports/{reportId} {
+      allow create: if request.auth != null;
+    }
+
+    // ── photoReviews ──────────────────────────────────────────────────────
+    // Users can submit photo reviews for their own account; admins manage them.
+    match /photoReviews/{reviewId} {
+      allow create: if request.auth != null
+          && request.resource.data.uid == request.auth.uid;
+    }
+
+    // ── appConfig ─────────────────────────────────────────────────────────
+    // Authenticated users can read app config; only admins may write.
+    match /appConfig/{docId} {
+      allow read: if request.auth != null;
+    }
+
+    // ── adminNotifications ────────────────────────────────────────────────
+    // Only admins interact with this collection (handled by wildcard above).
+
+  }
+}
