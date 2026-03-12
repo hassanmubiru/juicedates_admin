@@ -307,14 +307,20 @@ class AdminService {
   Stream<List<AdminUser>> getUnverifiedUsersWithPhotos() {
     return _db
         .collection('users')
-        .where('isVerified', isEqualTo: false)
-        .where('isBanned', isEqualTo: false)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map((s) => s.docs
-            .map(AdminUser.fromDoc)
-            .where((u) => u.photoUrl != null && u.photoUrl!.isNotEmpty)
-            .toList());
+        .map((s) {
+          final users = s.docs
+              .map(AdminUser.fromDoc)
+              .where((u) =>
+                  !u.isVerified &&
+                  !u.isBanned &&
+                  u.photoUrl != null &&
+                  u.photoUrl!.isNotEmpty)
+              .toList()
+            ..sort((a, b) => (b.createdAt ?? DateTime(0))
+                .compareTo(a.createdAt ?? DateTime(0)));
+          return users;
+        });
   }
 
   Future<List<AdminUser>> getPremiumUsers() async {
