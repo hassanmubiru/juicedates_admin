@@ -88,6 +88,27 @@ class _ContentModerationScreenState extends State<ContentModerationScreen>
   }
 
   Future<void> _unverifyUser(AdminUser user) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: kCard,
+        title: const Text('Remove Verification?',
+            style: TextStyle(color: Colors.white)),
+        content: Text(
+            '${user.displayName} will be marked as unverified and will need re-approval.',
+            style: const TextStyle(color: kMuted)),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: kDanger),
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Unverify')),
+        ],
+      ),
+    );
+    if (ok != true) return;
     await _svc.unverifyUser(user.uid);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
