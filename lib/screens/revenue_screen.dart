@@ -161,6 +161,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
                   // ── Revenue by tier table ────────────────────────────────
                   const Text('Revenue by Tier',
                       style: TextStyle(
+                          color: Colors.white,
                           fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   _TierTable(
@@ -172,6 +173,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
                   Row(children: [
                     const Text('New Subscriptions',
                         style: TextStyle(
+                            color: Colors.white,
                             fontSize: 16, fontWeight: FontWeight.bold)),
                     const SizedBox(width: 8),
                     Text('last 30 days',
@@ -195,6 +197,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
                   // ── Revenue breakdown bar ────────────────────────────────
                   const Text('Revenue Split',
                       style: TextStyle(
+                          color: Colors.white,
                           fontSize: 16, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 10),
                   _RevenueSplitBar(
@@ -490,10 +493,12 @@ class _RevenueSplitBar extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Row(
-              children: tiers.map((t) {
+              children: tiers
+                  .where((t) => revenues[t]! > 0)
+                  .map((t) {
                 final frac = revenues[t]! / total;
                 return Expanded(
-                  flex: (frac * 1000).round(),
+                  flex: (frac * 1000).round().clamp(1, 1000),
                   child: Container(
                     height: 24,
                     color: _colors[t] ?? kMuted,
