@@ -14,6 +14,7 @@ class RevenueScreen extends StatefulWidget {
 class _RevenueScreenState extends State<RevenueScreen> {
   final _svc = AdminService();
   bool _loading = true;
+  String? _error;
 
   Map<String, double> _prices = {'plus': 9.99, 'gold': 19.99, 'platinum': 29.99};
 
@@ -28,26 +29,30 @@ class _RevenueScreenState extends State<RevenueScreen> {
   }
 
   Future<void> _load() async {
-    setState(() => _loading = true);
-    final results = await Future.wait([
-      _svc.getSubscriptionBreakdown(),
-      _svc.getSubscriptionsByDay(30),
-      _svc.getAdminStats(),
-      _svc.getAppConfig(),
-    ]);
-    setState(() {
-      _tierBreakdown = results[0] as Map<String, int>;
-      _subscriptionsByDay = results[1] as List<Map<String, dynamic>>;
-      _totalUsers =
-          ((results[2] as Map<String, dynamic>)['totalUsers'] as int?) ?? 0;
-      final cfg = results[3] as AppConfig;
-      _prices = {
-        'plus': cfg.plusMonthlyUsd,
-        'gold': cfg.goldMonthlyUsd,
-        'platinum': cfg.platinumMonthlyUsd,
-      };
-      _loading = false;
-    });
+    setState(() { _loading = true; _error = null; });
+    try {
+      final results = await Future.wait([
+        _svc.getSubscriptionBreakdown(),
+        _svc.getSubscriptionsByDay(30),
+        _svc.getAdminStats(),
+        _svc.getAppConfig(),
+      ]);
+      setState(() {
+        _tierBreakdown = results[0] as Map<String, int>;
+        _subscriptionsByDay = results[1] as List<Map<String, dynamic>>;
+        _totalUsers =
+            ((results[2] as Map<String, dynamic>)['totalUsers'] as int?) ?? 0;
+        final cfg = results[3] as AppConfig;
+        _prices = {
+          'plus': cfg.plusMonthlyUsd,
+          'gold': cfg.goldMonthlyUsd,
+          'platinum': cfg.platinumMonthlyUsd,
+        };
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() { _loading = false; _error = e.toString(); });
+    }
   }
 
   int get _totalSubs =>
@@ -82,7 +87,35 @@ class _RevenueScreenState extends State<RevenueScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
+          : _error != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline_rounded,
+                          size: 48, color: kDanger),
+                      const SizedBox(height: 12),
+                      Text('Failed to load revenue data',
+                          style: const TextStyle(
+                              color: Colors.white, fontSize: 16)),
+                      const SizedBox(height: 8),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 32),
+                        child: Text(_error!,
+                            style: const TextStyle(
+                                color: kMuted, fontSize: 12),
+                            textAlign: TextAlign.center),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _load,
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

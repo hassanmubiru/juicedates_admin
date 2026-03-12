@@ -158,17 +158,17 @@ class AdminService {
 
   Future<List<Map<String, dynamic>>> getSubscriptionsByDay(int days) async {
     final cutoff = DateTime.now().subtract(Duration(days: days));
+    // Fetch all premium users client-side to avoid composite index requirement
     final snap = await _db
         .collection('users')
         .where('isPremium', isEqualTo: true)
-        .where('subscribedAt', isGreaterThan: Timestamp.fromDate(cutoff))
-        .orderBy('subscribedAt')
         .get();
     final Map<String, int> counts = {};
     for (final doc in snap.docs) {
       final ts = doc.data()['subscribedAt'];
       if (ts == null) continue;
       final dt = (ts as Timestamp).toDate();
+      if (dt.isBefore(cutoff)) continue; // filter in Dart
       final key =
           '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
       counts[key] = (counts[key] ?? 0) + 1;
