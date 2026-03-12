@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'theme.dart';
@@ -9,8 +11,18 @@ import 'screens/shell.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kDebugMode) debugPrint(details.toString());
+  };
+
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const JuiceDatesAdminApp());
+
+  runZonedGuarded(
+    () => runApp(const JuiceDatesAdminApp()),
+    (error, stack) => debugPrint('Zone error: $error\n$stack'),
+  );
 }
 
 class JuiceDatesAdminApp extends StatelessWidget {

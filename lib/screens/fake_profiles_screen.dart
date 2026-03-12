@@ -37,15 +37,27 @@ class _FakeProfilesScreenState extends State<FakeProfilesScreen>
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    final users = await _svc.getUsersOnce();
-    setState(() {
-      _flagged = users.where((u) => u.isSuspicious).toList();
-      _highReports = users
-          .where((u) => !u.isSuspicious && u.reportCount >= 3)
-          .toList()
-        ..sort((a, b) => b.reportCount.compareTo(a.reportCount));
-      _loading = false;
-    });
+    try {
+      final users = await _svc.getUsersOnce();
+      if (!mounted) return;
+      setState(() {
+        _flagged = users.where((u) => u.isSuspicious).toList();
+        _highReports = users
+            .where((u) => !u.isSuspicious && u.reportCount >= 3)
+            .toList()
+          ..sort((a, b) => b.reportCount.compareTo(a.reportCount));
+        _loading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to load profiles: $e'),
+          backgroundColor: kDanger,
+        ),
+      );
+    }
   }
 
   Future<void> _runAutoDetect() async {
