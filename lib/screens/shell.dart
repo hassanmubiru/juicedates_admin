@@ -74,7 +74,12 @@ class _AdminShellState extends State<AdminShell> {
           else       _RailSidebar(index: _index, onTap: (i) => setState(() => _index = i)),
 
           // ── Content ──────────────────────────────────────────────────
-          Expanded(child: _screens[_index]),
+          Expanded(
+            child: IndexedStack(
+              index: _index,
+              children: _screens,
+            ),
+          ),
         ],
       ),
     );

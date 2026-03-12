@@ -19,6 +19,18 @@ class AdminService {
     return users;
   }
 
+  /// Lightweight single-aggregate count — no document reads.
+  Future<int> getUserCount() async {
+    try {
+      final result = await _db.collection('users').count().get();
+      return result.count ?? 0;
+    } catch (_) {
+      // Fallback for environments where aggregate queries aren't supported.
+      final snap = await _db.collection('users').get();
+      return snap.size;
+    }
+  }
+
   Future<Map<String, dynamic>> getAdminStats() async {
     // Use client-side counting to avoid aggregation query requirements
     final results = await Future.wait([
