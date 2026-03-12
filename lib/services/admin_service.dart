@@ -369,9 +369,13 @@ class AdminService {
     int plus = 0, gold = 0, platinum = 0;
     for (final doc in snap.docs) {
       final tier = doc.data()['subscriptionTier'] as String? ?? '';
-      if (tier == 'plus') plus++;
-      else if (tier == 'gold') gold++;
-      else if (tier == 'platinum') platinum++;
+      if (tier == 'plus') {
+        plus++;
+      } else if (tier == 'gold') {
+        gold++;
+      } else if (tier == 'platinum') {
+        platinum++;
+      }
     }
     return {'plus': plus, 'gold': gold, 'platinum': platinum};
   }
