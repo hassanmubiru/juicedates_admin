@@ -206,13 +206,20 @@ class AdminService {
   // ── Reports ────────────────────────────────────────────────────────────
 
   Stream<List<AdminReport>> getReports({bool unresolvedOnly = false}) {
-    Query q =
-        _db.collection('reports').orderBy('timestamp', descending: true);
-    if (unresolvedOnly) q = q.where('resolved', isEqualTo: false);
-    return q.snapshots().map((s) => s.docs
-        .map((d) => AdminReport.fromDoc(
-            d as DocumentSnapshot<Map<String, dynamic>>))
-        .toList());
+    return _db
+        .collection('reports')
+        .orderBy('timestamp', descending: true)
+        .snapshots()
+        .map((s) {
+          final docs = s.docs
+              .map((d) => AdminReport.fromDoc(
+                  d as DocumentSnapshot<Map<String, dynamic>>))
+              .toList();
+          if (unresolvedOnly) {
+            return docs.where((r) => !r.resolved).toList();
+          }
+          return docs;
+        });
   }
 
   Future<void> resolveReport(String reportId) async {
@@ -280,13 +287,17 @@ class AdminService {
   Stream<List<PhotoReview>> getPendingPhotoReviews() {
     return _db
         .collection('photoReviews')
-        .where('status', isEqualTo: 'pending')
-        .orderBy('submittedAt', descending: false)
         .snapshots()
-        .map((s) => s.docs
-            .map((d) => PhotoReview.fromDoc(
-                d as DocumentSnapshot<Map<String, dynamic>>))
-            .toList());
+        .map((s) {
+          final reviews = s.docs
+              .map((d) => PhotoReview.fromDoc(
+                  d as DocumentSnapshot<Map<String, dynamic>>))
+              .where((r) => r.status == 'pending')
+              .toList()
+            ..sort((a, b) => (a.submittedAt ?? DateTime(0))
+                .compareTo(b.submittedAt ?? DateTime(0)));
+          return reviews;
+        });
   }
 
   Future<void> approvePhoto(String reviewId, String uid) async {
