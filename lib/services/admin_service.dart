@@ -304,6 +304,19 @@ class AdminService {
 
   // ── Subscriptions ──────────────────────────────────────────────────────
 
+  Stream<List<AdminUser>> getUnverifiedUsersWithPhotos() {
+    return _db
+        .collection('users')
+        .where('isVerified', isEqualTo: false)
+        .where('isBanned', isEqualTo: false)
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((s) => s.docs
+            .map(AdminUser.fromDoc)
+            .where((u) => u.photoUrl != null && u.photoUrl!.isNotEmpty)
+            .toList());
+  }
+
   Future<List<AdminUser>> getPremiumUsers() async {
     final snap = await _db
         .collection('users')
