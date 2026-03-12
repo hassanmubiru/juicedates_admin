@@ -20,27 +20,33 @@ class AdminService {
   }
 
   Future<Map<String, dynamic>> getAdminStats() async {
+    // Use client-side counting to avoid aggregation query requirements
     final results = await Future.wait([
-      _db.collection('users').count().get(),
-      _db.collection('users').where('isPremium', isEqualTo: true).count().get(),
-      _db.collection('matches').count().get(),
-      _db.collection('reports').where('resolved', isEqualTo: false).count().get(),
-      _db.collection('moments').count().get(),
-      _db.collection('winks').count().get(),
-      _db.collection('users').where('isBanned', isEqualTo: true).count().get(),
-      _db.collection('users').where('isVerified', isEqualTo: true).count().get(),
-      _db.collection('photoReviews').where('status', isEqualTo: 'pending').count().get(),
+      _db.collection('users').get(),
+      _db.collection('matches').get(),
+      _db.collection('reports').where('resolved', isEqualTo: false).get(),
+      _db.collection('moments').get(),
+      _db.collection('winks').get(),
+      _db.collection('photoReviews').where('status', isEqualTo: 'pending').get(),
     ]);
+    final userDocs = (results[0] as QuerySnapshot).docs;
+    int premiumUsers = 0, bannedUsers = 0, verifiedUsers = 0;
+    for (final doc in userDocs) {
+      final d = doc.data() as Map<String, dynamic>;
+      if (d['isPremium'] == true) premiumUsers++;
+      if (d['isBanned'] == true) bannedUsers++;
+      if (d['isVerified'] == true) verifiedUsers++;
+    }
     return {
-      'totalUsers':    results[0].count ?? 0,
-      'premiumUsers':  results[1].count ?? 0,
-      'totalMatches':  results[2].count ?? 0,
-      'openReports':   results[3].count ?? 0,
-      'moments':       results[4].count ?? 0,
-      'winks':         results[5].count ?? 0,
-      'bannedUsers':   results[6].count ?? 0,
-      'verifiedUsers': results[7].count ?? 0,
-      'pendingPhotos': results[8].count ?? 0,
+      'totalUsers':    userDocs.length,
+      'premiumUsers':  premiumUsers,
+      'totalMatches':  (results[1] as QuerySnapshot).docs.length,
+      'openReports':   (results[2] as QuerySnapshot).docs.length,
+      'moments':       (results[3] as QuerySnapshot).docs.length,
+      'winks':         (results[4] as QuerySnapshot).docs.length,
+      'bannedUsers':   bannedUsers,
+      'verifiedUsers': verifiedUsers,
+      'pendingPhotos': (results[5] as QuerySnapshot).docs.length,
     };
   }
 
@@ -310,12 +316,15 @@ class AdminService {
         .collection('users')
         .snapshots()
         .map((s) {
-          final users = s.docs
-              .map(AdminUser.fromDoc)
-              .where((u) => u.isVerified && !u.isBanned)
-              .toList()
-            ..sort((a, b) => (b.createdAt ?? DateTime(0))
-                .compareTo(a.createdAt ?? DateTime(0)));
+          final users = <AdminUser>[];
+          for (final doc in s.docs) {
+            try {
+              final u = AdminUser.fromDoc(doc);
+              if (u.isVerified && !u.isBanned) users.add(u);
+            } catch (_) {}
+          }
+          users.sort((a, b) => (b.createdAt ?? DateTime(0))
+              .compareTo(a.createdAt ?? DateTime(0)));
           return users;
         });
   }
@@ -325,16 +334,20 @@ class AdminService {
         .collection('users')
         .snapshots()
         .map((s) {
-          final users = s.docs
-              .map(AdminUser.fromDoc)
-              .where((u) =>
-                  !u.isVerified &&
+          final users = <AdminUser>[];
+          for (final doc in s.docs) {
+            try {
+              final u = AdminUser.fromDoc(doc);
+              if (!u.isVerified &&
                   !u.isBanned &&
                   u.photoUrl != null &&
-                  u.photoUrl!.isNotEmpty)
-              .toList()
-            ..sort((a, b) => (b.createdAt ?? DateTime(0))
-                .compareTo(a.createdAt ?? DateTime(0)));
+                  u.photoUrl!.isNotEmpty) {
+                users.add(u);
+              }
+            } catch (_) {}
+          }
+          users.sort((a, b) => (b.createdAt ?? DateTime(0))
+              .compareTo(a.createdAt ?? DateTime(0)));
           return users;
         });
   }
@@ -343,22 +356,24 @@ class AdminService {
     final snap = await _db
         .collection('users')
         .where('isPremium', isEqualTo: true)
-        .orderBy('createdAt', descending: true)
         .get();
-    return snap.docs.map(AdminUser.fromDoc).toList();
+    final users = snap.docs.map(AdminUser.fromDoc).toList();
+    users.sort((a, b) => (b.createdAt ?? DateTime(0))
+        .compareTo(a.createdAt ?? DateTime(0)));
+    return users;
   }
 
   Future<Map<String, int>> getSubscriptionBreakdown() async {
-    final results = await Future.wait([
-      _db.collection('users').where('subscriptionTier', isEqualTo: 'plus').count().get(),
-      _db.collection('users').where('subscriptionTier', isEqualTo: 'gold').count().get(),
-      _db.collection('users').where('subscriptionTier', isEqualTo: 'platinum').count().get(),
-    ]);
-    return {
-      'plus':     results[0].count ?? 0,
-      'gold':     results[1].count ?? 0,
-      'platinum': results[2].count ?? 0,
-    };
+    // Fetch all users client-side to avoid needing multiple single-field indexes
+    final snap = await _db.collection('users').get();
+    int plus = 0, gold = 0, platinum = 0;
+    for (final doc in snap.docs) {
+      final tier = doc.data()['subscriptionTier'] as String? ?? '';
+      if (tier == 'plus') plus++;
+      else if (tier == 'gold') gold++;
+      else if (tier == 'platinum') platinum++;
+    }
+    return {'plus': plus, 'gold': gold, 'platinum': platinum};
   }
 
   // ── App Config ────────────────────────────────────────────────────────
