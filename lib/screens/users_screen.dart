@@ -18,6 +18,7 @@ class _UsersScreenState extends State<UsersScreen> {
   String _query      = '';
   bool _bannedOnly   = false;
   bool _premiumOnly  = false;
+  bool _verifiedOnly = false;
   late Future<List<AdminUser>> _usersFuture;
 
   @override
@@ -36,8 +37,9 @@ class _UsersScreenState extends State<UsersScreen> {
 
   List<AdminUser> _filter(List<AdminUser> all) {
     return all.where((u) {
-      if (_bannedOnly  && !u.isBanned)  return false;
-      if (_premiumOnly && !u.isPremium) return false;
+      if (_bannedOnly   && !u.isBanned)   return false;
+      if (_premiumOnly  && !u.isPremium)  return false;
+      if (_verifiedOnly && !u.isVerified) return false;
       if (_query.isEmpty) return true;
       final q = _query.toLowerCase();
       return u.displayName.toLowerCase().contains(q) ||
@@ -74,6 +76,13 @@ class _UsersScreenState extends State<UsersScreen> {
             active: _premiumOnly,
             onTap: () => setState(() => _premiumOnly = !_premiumOnly),
             activeColor: kWarning,
+          ),
+          const SizedBox(width: 8),
+          _FilterChip(
+            label: 'Verified ✅',
+            active: _verifiedOnly,
+            onTap: () => setState(() => _verifiedOnly = !_verifiedOnly),
+            activeColor: kSuccess,
           ),
           const SizedBox(width: 16),
         ],

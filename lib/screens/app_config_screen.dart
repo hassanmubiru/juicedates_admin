@@ -83,7 +83,9 @@ class _ConfigFormState extends State<_ConfigForm> {
   late TextEditingController _premiumLikesCtrl;
   late TextEditingController _boostDurationCtrl;
   late TextEditingController _boostPriceCtrl;
-  late TextEditingController _premiumPriceCtrl;
+  late TextEditingController _plusPriceCtrl;
+  late TextEditingController _goldPriceCtrl;
+  late TextEditingController _platinumPriceCtrl;
   late TextEditingController _minAgeCtrl;
   late TextEditingController _maxAgeCtrl;
   late TextEditingController _maxDistCtrl;
@@ -104,8 +106,12 @@ class _ConfigFormState extends State<_ConfigForm> {
         TextEditingController(text: '${c.boostDurationMinutes}');
     _boostPriceCtrl =
         TextEditingController(text: c.boostPriceUsd.toStringAsFixed(2));
-    _premiumPriceCtrl = TextEditingController(
-        text: c.premiumMonthlyUsd.toStringAsFixed(2));
+    _plusPriceCtrl =
+        TextEditingController(text: c.plusMonthlyUsd.toStringAsFixed(2));
+    _goldPriceCtrl =
+        TextEditingController(text: c.goldMonthlyUsd.toStringAsFixed(2));
+    _platinumPriceCtrl =
+        TextEditingController(text: c.platinumMonthlyUsd.toStringAsFixed(2));
     _minAgeCtrl = TextEditingController(text: '${c.minAge}');
     _maxAgeCtrl = TextEditingController(text: '${c.maxAge}');
     _maxDistCtrl =
@@ -116,7 +122,8 @@ class _ConfigFormState extends State<_ConfigForm> {
   void dispose() {
     for (final c in [
       _freeLikesCtrl, _premiumLikesCtrl, _boostDurationCtrl,
-      _boostPriceCtrl, _premiumPriceCtrl, _minAgeCtrl, _maxAgeCtrl, _maxDistCtrl
+      _boostPriceCtrl, _plusPriceCtrl, _goldPriceCtrl, _platinumPriceCtrl,
+      _minAgeCtrl, _maxAgeCtrl, _maxDistCtrl
     ]) {
       c.dispose();
     }
@@ -134,7 +141,9 @@ class _ConfigFormState extends State<_ConfigForm> {
       premiumDailyLikes: int.tryParse(_premiumLikesCtrl.text) ?? 999,
       boostDurationMinutes: int.tryParse(_boostDurationCtrl.text) ?? 30,
       boostPriceUsd: double.tryParse(_boostPriceCtrl.text) ?? 3.99,
-      premiumMonthlyUsd: double.tryParse(_premiumPriceCtrl.text) ?? 9.99,
+      plusMonthlyUsd: double.tryParse(_plusPriceCtrl.text) ?? 9.99,
+      goldMonthlyUsd: double.tryParse(_goldPriceCtrl.text) ?? 19.99,
+      platinumMonthlyUsd: double.tryParse(_platinumPriceCtrl.text) ?? 29.99,
       minAge: int.tryParse(_minAgeCtrl.text) ?? 18,
       maxAge: int.tryParse(_maxAgeCtrl.text) ?? 65,
       maxDistanceKm: double.tryParse(_maxDistCtrl.text) ?? 100,
@@ -250,9 +259,21 @@ class _ConfigFormState extends State<_ConfigForm> {
               runSpacing: 16,
               children: [
                 _NumField(
-                  label: 'Premium / month (USD)',
-                  controller: _premiumPriceCtrl,
-                  width: wide ? 220 : double.infinity,
+                  label: 'Plus / month (USD)',
+                  controller: _plusPriceCtrl,
+                  width: wide ? 180 : double.infinity,
+                  isDecimal: true,
+                ),
+                _NumField(
+                  label: 'Gold / month (USD)',
+                  controller: _goldPriceCtrl,
+                  width: wide ? 180 : double.infinity,
+                  isDecimal: true,
+                ),
+                _NumField(
+                  label: 'Platinum / month (USD)',
+                  controller: _platinumPriceCtrl,
+                  width: wide ? 180 : double.infinity,
                   isDecimal: true,
                 ),
               ],

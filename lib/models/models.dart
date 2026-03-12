@@ -242,6 +242,9 @@ class AppConfig {
   final int boostDurationMinutes;
   final double boostPriceUsd;
   final double premiumMonthlyUsd;
+  final double plusMonthlyUsd;
+  final double goldMonthlyUsd;
+  final double platinumMonthlyUsd;
   final int minAge;
   final int maxAge;
   final double maxDistanceKm;
@@ -256,6 +259,9 @@ class AppConfig {
     this.boostDurationMinutes = 30,
     this.boostPriceUsd = 3.99,
     this.premiumMonthlyUsd = 9.99,
+    this.plusMonthlyUsd = 9.99,
+    this.goldMonthlyUsd = 19.99,
+    this.platinumMonthlyUsd = 29.99,
     this.minAge = 18,
     this.maxAge = 65,
     this.maxDistanceKm = 100,
@@ -264,6 +270,7 @@ class AppConfig {
   });
 
   factory AppConfig.fromMap(Map<String, dynamic> d) {
+    final legacyPrice = (d['premiumMonthlyUsd'] as num?)?.toDouble() ?? 9.99;
     return AppConfig(
       maintenanceMode: d['maintenanceMode'] as bool? ?? false,
       registrationEnabled: d['registrationEnabled'] as bool? ?? true,
@@ -271,7 +278,10 @@ class AppConfig {
       premiumDailyLikes: d['premiumDailyLikes'] as int? ?? 999,
       boostDurationMinutes: d['boostDurationMinutes'] as int? ?? 30,
       boostPriceUsd: (d['boostPriceUsd'] as num?)?.toDouble() ?? 3.99,
-      premiumMonthlyUsd: (d['premiumMonthlyUsd'] as num?)?.toDouble() ?? 9.99,
+      premiumMonthlyUsd: legacyPrice,
+      plusMonthlyUsd: (d['plusMonthlyUsd'] as num?)?.toDouble() ?? legacyPrice,
+      goldMonthlyUsd: (d['goldMonthlyUsd'] as num?)?.toDouble() ?? (legacyPrice * 2),
+      platinumMonthlyUsd: (d['platinumMonthlyUsd'] as num?)?.toDouble() ?? (legacyPrice * 3),
       minAge: d['minAge'] as int? ?? 18,
       maxAge: d['maxAge'] as int? ?? 65,
       maxDistanceKm: (d['maxDistanceKm'] as num?)?.toDouble() ?? 100,
@@ -288,6 +298,9 @@ class AppConfig {
         'boostDurationMinutes': boostDurationMinutes,
         'boostPriceUsd': boostPriceUsd,
         'premiumMonthlyUsd': premiumMonthlyUsd,
+        'plusMonthlyUsd': plusMonthlyUsd,
+        'goldMonthlyUsd': goldMonthlyUsd,
+        'platinumMonthlyUsd': platinumMonthlyUsd,
         'minAge': minAge,
         'maxAge': maxAge,
         'maxDistanceKm': maxDistanceKm,

@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../models/models.dart';
 import '../services/admin_service.dart';
 import '../theme.dart';
 
@@ -14,7 +15,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
   final _svc = AdminService();
   bool _loading = true;
 
-  static const _prices = {'plus': 9.99, 'gold': 19.99, 'platinum': 29.99};
+  Map<String, double> _prices = {'plus': 9.99, 'gold': 19.99, 'platinum': 29.99};
 
   Map<String, int> _tierBreakdown = {};
   List<Map<String, dynamic>> _subscriptionsByDay = [];
@@ -32,12 +33,19 @@ class _RevenueScreenState extends State<RevenueScreen> {
       _svc.getSubscriptionBreakdown(),
       _svc.getSubscriptionsByDay(30),
       _svc.getAdminStats(),
+      _svc.getAppConfig(),
     ]);
     setState(() {
       _tierBreakdown = results[0] as Map<String, int>;
       _subscriptionsByDay = results[1] as List<Map<String, dynamic>>;
       _totalUsers =
           ((results[2] as Map<String, dynamic>)['totalUsers'] as int?) ?? 0;
+      final cfg = results[3] as AppConfig;
+      _prices = {
+        'plus': cfg.plusMonthlyUsd,
+        'gold': cfg.goldMonthlyUsd,
+        'platinum': cfg.platinumMonthlyUsd,
+      };
       _loading = false;
     });
   }

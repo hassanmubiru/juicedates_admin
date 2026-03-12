@@ -13,6 +13,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   final _svc       = AdminService();
   final _titleCtrl = TextEditingController();
   final _bodyCtrl  = TextEditingController();
+  final _cityCtrl  = TextEditingController();
   final _formKey   = GlobalKey<FormState>();
   bool _sending    = false;
   String _segment  = 'all'; // 'all' | 'premium' | 'city'
@@ -21,18 +22,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void dispose() {
     _titleCtrl.dispose();
     _bodyCtrl.dispose();
+    _cityCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _send() async {
     if (!_formKey.currentState!.validate()) return;
+    if (_segment == 'city' && _cityCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter a city name'),
+          backgroundColor: kDanger,
+        ),
+      );
+      return;
+    }
     setState(() => _sending = true);
     await _svc.sendBroadcast(
         _titleCtrl.text.trim(), _bodyCtrl.text.trim(),
-        segment: _segment);
+        segment: _segment,
+        cityTarget: _segment == 'city' ? _cityCtrl.text.trim() : '');
     if (mounted) {
       _titleCtrl.clear();
       _bodyCtrl.clear();
+      _cityCtrl.clear();
       setState(() => _sending = false);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -68,6 +81,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           formKey: _formKey,
                           titleCtrl: _titleCtrl,
                           bodyCtrl: _bodyCtrl,
+                          cityCtrl: _cityCtrl,
                           sending: _sending,                          segment: _segment,
                           onSegmentChanged: (s) => setState(() => _segment = s),                          onSend: _send,
                         )),
@@ -81,6 +95,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       formKey: _formKey,
                       titleCtrl: _titleCtrl,
                       bodyCtrl: _bodyCtrl,
+                      cityCtrl: _cityCtrl,
                       sending: _sending,
                       segment: _segment,
                       onSegmentChanged: (s) => setState(() => _segment = s),
@@ -100,6 +115,7 @@ class _ComposeCard extends StatelessWidget {
   final GlobalKey<FormState> formKey;
   final TextEditingController titleCtrl;
   final TextEditingController bodyCtrl;
+  final TextEditingController cityCtrl;
   final bool sending;
   final String segment;
   final ValueChanged<String> onSegmentChanged;
@@ -108,6 +124,7 @@ class _ComposeCard extends StatelessWidget {
     required this.formKey,
     required this.titleCtrl,
     required this.bodyCtrl,
+    required this.cityCtrl,
     required this.sending,
     required this.segment,
     required this.onSegmentChanged,
@@ -171,6 +188,19 @@ class _ComposeCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
+              // City input — only visible when 'By City' is selected
+              if (segment == 'city') ...[  
+                TextFormField(
+                  controller: cityCtrl,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: 'City name',
+                    prefixIcon: Icon(Icons.location_city_rounded),
+                    hintText: 'e.g. Lagos, London…',
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
               TextFormField(
                 controller: titleCtrl,
                 style: const TextStyle(color: Colors.white),

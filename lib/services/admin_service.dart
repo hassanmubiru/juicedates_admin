@@ -247,11 +247,12 @@ class AdminService {
   }
 
   Future<void> sendBroadcast(String title, String body,
-      {String segment = 'all'}) async {
+      {String segment = 'all', String cityTarget = ''}) async {
     await _db.collection('adminNotifications').add({
       'title': title,
       'body': body,
       'segment': segment,
+      if (cityTarget.isNotEmpty) 'cityTarget': cityTarget,
       'sentAt': FieldValue.serverTimestamp(),
       'status': 'queued',
     });
@@ -303,6 +304,21 @@ class AdminService {
   }
 
   // ── Subscriptions ──────────────────────────────────────────────────────
+
+  Stream<List<AdminUser>> getVerifiedUsers() {
+    return _db
+        .collection('users')
+        .snapshots()
+        .map((s) {
+          final users = s.docs
+              .map(AdminUser.fromDoc)
+              .where((u) => u.isVerified && !u.isBanned)
+              .toList()
+            ..sort((a, b) => (b.createdAt ?? DateTime(0))
+                .compareTo(a.createdAt ?? DateTime(0)));
+          return users;
+        });
+  }
 
   Stream<List<AdminUser>> getUnverifiedUsersWithPhotos() {
     return _db
