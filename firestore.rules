@@ -4,24 +4,29 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // ── Helper: true when the caller is a verified admin ──────────────────
+    // Uses exists() before get() to avoid a null-data error when the user
+    // document hasn't been created yet, and .get('isAdmin', false) for safe
+    // map access. Works for both document reads AND list/aggregation queries.
     function isAdmin() {
       return request.auth != null
-          && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+          && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+          && get(/databases/$(database)/documents/users/$(request.auth.uid))
+               .data.get('isAdmin', false) == true;
     }
 
-    // ── Admin panel: full access to every collection ──────────────────────
-    match /{collection}/{document=**} {
+    // ── Admin panel: full access to every path ────────────────────────────
+    // Single recursive wildcard /{document=**} is the correct global match
+    // that covers documents, list queries, AND aggregation queries (count).
+    match /{document=**} {
       allow read, write: if isAdmin();
     }
 
     // ── users ─────────────────────────────────────────────────────────────
-    // Logged-in users can read/write their own document.
     match /users/{uid} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
 
     // ── matches ───────────────────────────────────────────────────────────
-    // Participants of a match can read it.
     match /matches/{matchId} {
       allow read: if request.auth != null
           && (resource.data.uid1 == request.auth.uid
@@ -29,7 +34,6 @@ service cloud.firestore {
     }
 
     // ── moments ───────────────────────────────────────────────────────────
-    // Any authenticated user can read moments; owners can write their own.
     match /moments/{momentId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null
@@ -48,26 +52,19 @@ service cloud.firestore {
     }
 
     // ── reports ───────────────────────────────────────────────────────────
-    // Users can file reports; only admins can read or resolve them.
     match /reports/{reportId} {
       allow create: if request.auth != null;
     }
 
     // ── photoReviews ──────────────────────────────────────────────────────
-    // Users can submit photo reviews for their own account; admins manage them.
     match /photoReviews/{reviewId} {
       allow create: if request.auth != null
           && request.resource.data.uid == request.auth.uid;
     }
 
     // ── appConfig ─────────────────────────────────────────────────────────
-    // Authenticated users can read app config; only admins may write.
     match /appConfig/{docId} {
       allow read: if request.auth != null;
     }
-
-    // ── adminNotifications ────────────────────────────────────────────────
-    // Only admins interact with this collection (handled by wildcard above).
-
   }
 }
