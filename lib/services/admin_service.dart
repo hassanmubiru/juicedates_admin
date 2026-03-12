@@ -400,7 +400,8 @@ class AdminService {
         platinum++;
       }
     }
-    return {'plus': plus, 'gold': gold, 'platinum': platinum};
+    // Include total so callers don't need a separate count query
+    return {'plus': plus, 'gold': gold, 'platinum': platinum, 'total': snap.size};
   }
 
   // ── App Config ────────────────────────────────────────────────────────

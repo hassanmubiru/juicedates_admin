@@ -34,14 +34,15 @@ class _RevenueScreenState extends State<RevenueScreen> {
       final results = await Future.wait([
         _svc.getSubscriptionBreakdown(),
         _svc.getSubscriptionsByDay(30),
-        _svc.getUserCount(),
         _svc.getAppConfig(),
       ]);
+      if (!mounted) return;
       setState(() {
-        _tierBreakdown = results[0] as Map<String, int>;
+        final breakdown = results[0] as Map<String, int>;
+        _tierBreakdown = breakdown;
+        _totalUsers = breakdown['total'] ?? 0;
         _subscriptionsByDay = results[1] as List<Map<String, dynamic>>;
-        _totalUsers = results[2] as int;
-        final cfg = results[3] as AppConfig;
+        final cfg = results[2] as AppConfig;
         _prices = {
           'plus': cfg.plusMonthlyUsd,
           'gold': cfg.goldMonthlyUsd,
@@ -50,6 +51,7 @@ class _RevenueScreenState extends State<RevenueScreen> {
         _loading = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() { _loading = false; _error = e.toString(); });
     }
   }
